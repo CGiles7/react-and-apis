@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 import AlbumList from "./AlbumList";
@@ -7,8 +7,31 @@ import UserList from "./UserList";
 function App() {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
+  const [originalTitle, setOriginalTitle] = useState(document.title);
 
-  // Load data from https://jsonplaceholder.typicode.com/albums?userId=${user.id}
+  useEffect(() => {
+    document.title = "Awesome Album App";
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [originalTitle]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    fetch("https://jsonplaceholder.typicode.com/users", {
+      signal: abortController.signal,
+    })
+      .then((response) => response.json())
+      .then((data) => setUsers(data))
+      .catch((error) => {
+        // Handle error if needed
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, []);
 
   return (
     <div className="App">
